@@ -1,5 +1,5 @@
 import { defineNuxtModule } from '@nuxt/kit'
-import { processInlineHtml } from './inlineHtml'
+import { processHtmlFiles } from './inlineHtml'
 import type { SingleHtmlOptions } from './options'
 
 export default defineNuxtModule<SingleHtmlOptions>({
@@ -10,8 +10,7 @@ export default defineNuxtModule<SingleHtmlOptions>({
   defaults: {
     enabled: true,
     deleteInlinedFiles: true,
-    entry: 'index.html',
-    entryRoute: '/',
+    output: '[name].html',
   },
   setup(options, nuxt) {
     // only run when nuxi generate
@@ -47,14 +46,6 @@ export default defineNuxtModule<SingleHtmlOptions>({
     nuxt.options.nitro.prerender ||= {}
     ;(nuxt.options.nitro.prerender.ignore ||= []).push('/200.html', '/404.html')
 
-    // skip prerender for routes other than entryRoute
-    nuxt.hook('nitro:init', (nitro) => {
-      nitro.hooks.hook('prerender:generate', (route) => {
-        if (route.route !== options.entryRoute)
-          route.skip = true
-      })
-    })
-
     // remove prefetch and preload
     nuxt.hook('build:manifest', (manifest) => {
       for (const key in manifest) {
@@ -67,7 +58,7 @@ export default defineNuxtModule<SingleHtmlOptions>({
     // process entry html to replace inline js and css after prerender
     nuxt.hook('nitro:build:public-assets', (nitro) => {
       const dir = nitro.options.output.publicDir
-      processInlineHtml(dir, options)
+      processHtmlFiles(dir, options)
     })
   },
 })

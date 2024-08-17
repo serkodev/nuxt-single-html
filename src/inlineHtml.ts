@@ -1,17 +1,41 @@
 import { join } from 'node:path'
-import { readFileSync, readdirSync, rmdirSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
+import { readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import type { SingleHtmlOptions } from './options'
+import { findHtmlFiles, removeEmptyDirectories, replaceOutputFileName } from './utils'
 
-export function processInlineHtml(baseFolder: string, options: SingleHtmlOptions) {
-  const { deleteInlinedFiles, entry, output = entry } = options
+export function processHtmlFiles(baseFolder: string, options: SingleHtmlOptions) {
+  const { deleteInlinedFiles, output } = options
 
+  try {
+    const toRemoveFiles = new Set<string>()
+
+    for (const entry of findHtmlFiles(baseFolder)) {
+      const inlinedFiles = inlineFilesInHtml(baseFolder, entry, output)
+      for (const file of inlinedFiles)
+        toRemoveFiles.add(file)
+    }
+
+    if (deleteInlinedFiles) {
+      console.log('[single-html] Deleting inlined files')
+      for (const file of toRemoveFiles) {
+        unlinkSync(file)
+      }
+      removeEmptyDirectories(baseFolder)
+    }
+  }
+  catch (error) {
+    console.error('[single-html] Error processing HTML files:', error)
+  }
+}
+
+function inlineFilesInHtml(baseFolder: string, htmlPath: string, output: string) {
   const inlinedFiles: string[] = []
 
-  function replaceStyleTags(htmlContent: string, baseDir: string) {
+  function replaceStyleTags(htmlContent: string) {
     const regex = /<link[^>]*rel="stylesheet"[^>]*href="\/([^"]*)"[^>]*>/g
     return htmlContent.replace(regex, (match, href) => {
       try {
-        const filePath = join(baseDir, href)
+        const filePath = join(baseFolder, href)
         const contents = readFileSync(filePath, 'utf-8')
         inlinedFiles.push(filePath)
         return `<style>${contents}</style>`
@@ -22,12 +46,12 @@ export function processInlineHtml(baseFolder: string, options: SingleHtmlOptions
     })
   }
 
-  function replaceScriptTags(htmlContent: string, baseDir: string) {
+  function replaceScriptTags(htmlContent: string) {
     const regex = /<script(?:\s+type="([^"]*)")?\s+src="\/([^"]*)"[^>]*>[\s\S]*?<\/script>/g
     return htmlContent.replace(regex, (match, type, src) => {
       try {
-        const filePath = join(baseDir, src)
-        const contents = readFileSync(join(baseDir, src), 'utf-8')
+        const filePath = join(baseFolder, src)
+        const contents = readFileSync(join(baseFolder, src), 'utf-8')
         inlinedFiles.push(filePath)
         return `<script${type ? ` type="${type}"` : ''}>${contents}</script>`
       }
@@ -37,49 +61,20 @@ export function processInlineHtml(baseFolder: string, options: SingleHtmlOptions
     })
   }
 
-  // Function to recursively scan directories and remove empty ones
-  function removeEmptyDirectories(directory: string) {
-    const files = readdirSync(directory)
-    for (const file of files) {
-      const fullPath = join(directory, file)
-      if (statSync(fullPath).isDirectory()) {
-        removeEmptyDirectories(fullPath)
-        const isEmpty = readdirSync(fullPath).length === 0
-        if (isEmpty) {
-          rmdirSync(fullPath)
-        }
-      }
-    }
-  }
+  const filePath = join(baseFolder, htmlPath)
 
-  try {
-    console.log(`[single-html] Processing single html: ${entry}`)
-    const filePath = join(baseFolder, entry)
+  console.log(`[single-html] Processing single html: ${htmlPath}`)
+  let html = readFileSync(filePath, 'utf-8')
 
-    let html = readFileSync(filePath, 'utf-8')
+  html = replaceStyleTags(html)
+  html = replaceScriptTags(html)
 
-    html = replaceStyleTags(html, baseFolder)
-    html = replaceScriptTags(html, baseFolder)
+  const outputPath = replaceOutputFileName(htmlPath, output)
+  writeFileSync(join(baseFolder, outputPath), html, 'utf-8')
 
-    writeFileSync(join(baseFolder, output), html, 'utf-8')
+  // remove original html file if output is different
+  if (outputPath !== htmlPath)
+    unlinkSync(filePath)
 
-    console.log(`[single-html] Processed and saved: ${output}`)
-
-    // Remove original file if output is different
-    if (entry !== output) {
-      unlinkSync(filePath)
-    }
-
-    if (deleteInlinedFiles) {
-      for (const file of inlinedFiles) {
-        unlinkSync(file)
-      }
-      removeEmptyDirectories(baseFolder)
-
-      console.log('[single-html] Deleted inlined files')
-    }
-  }
-  catch (error) {
-    console.error('[single-html] Error processing HTML files:', error)
-  }
+  return inlinedFiles
 }
