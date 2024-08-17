@@ -94,6 +94,18 @@ export default {
   - **Description:** The output filename for the generated single HTML file. You can use `[name]` to refer to the original HTML file name. 
   - **Default:** `'[name].html'`
 
+## FAQ
+
+### How are the assets built?
+
+All assets (images, fonts, CSS, etc.) inside the [`assets/`](https://nuxt.com/docs/guide/directory-structure/assets) directory will be inlined into the single HTML file. However, assets inside the [`public/`](https://nuxt.com/docs/guide/directory-structure/public) directory will not be inlined. For more details, please refer to the [Nuxt Assets](https://nuxt.com/docs/getting-started/assets) documentation.
+
+### Why are multiple HTML files generated?
+
+If you’re using Nuxt Pages, multiple single HTML files may be generated for each route. Each HTML file contains the full source code for all route pages, meaning they can operate independently and still support SPA behavior. The only difference is that each HTML file is pre-rendered for its corresponding route.
+
+Simply put, if you only need `index.html` as your entry point, you can deploy just the `index.html` and able to safely ignore the other HTML files. You can also check out config [memory history mode](https://nuxt.com/docs/guide/recipes/custom-routing#custom-history-advanced) to fit your needs.
+
 ## Contribution
 
 <details>
