@@ -50,19 +50,21 @@ TODO
   pnpm install
   
   # Generate type stubs
-  pnpm run dev:prepare
+  pnpm dev:prepare
   
   # Develop with the playground
-  pnpm run play
+  pnpm play
   
-  # Build the playground with single-html module
-  pnpm run play:generate
+  # Build and preview the playground with single-html module
+  pnpm play:generate
+  pnpm play:preview
   
   # Run ESLint
-  pnpm run lint
+  pnpm lint
+  pnpm lint:fix
   
   # Release new version
-  pnpm run release
+  pnpm release
   ```
 
 </details>
