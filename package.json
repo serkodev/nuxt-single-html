@@ -1,6 +1,6 @@
 {
   "name": "nuxt-single-html",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Build a Nuxt app into a single HTML file.",
   "repository": {
     "type": "git",
@@ -27,7 +27,7 @@
     "play:generate": "nuxi generate playground",
     "play:preview": "nuxi preview playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
-    "release": "npm run lint && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "release": "npm run lint && npm run prepack && changelogen --no-output --release && npm publish && git push --follow-tags",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
