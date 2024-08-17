@@ -13,10 +13,15 @@ export default defineNuxtModule<SingleHtmlOptions>({
     output: '[name].html',
   },
   setup(options, nuxt) {
+    if (!options.enabled)
+      return
+
     // only run when nuxi generate
     const isPrerender = nuxt.options.nitro.static
-    if (!isPrerender || !options.enabled)
+    if (!isPrerender) {
+      console.warn('nuxt-single-html module only works with `nuxt generate` or `nuxt build --prerender` commands.')
       return
+    }
 
     // remove /_nuxt/builds folder
     nuxt.options.experimental.appManifest = false
