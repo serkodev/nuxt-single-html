@@ -14,13 +14,21 @@ Build a Nuxt app into a single HTML file.
 - 🚀 &nbsp;Works out-of-the-box with zero configuration required for seamless setup.
 - 📦 &nbsp;Supports inline JavaScript, CSS and images, etc.
 - ⚡ &nbsp;SSG & SPA friendly, works with Nuxt Pages and multiple routes.
-- 🛠️ &nbsp;Achieve single HTML file generation by adjusting Nuxt options, no additional dependencies required.
+- 🧩 &nbsp;Achieve single HTML file generation by adjusting Nuxt config within a Nuxt module, no additional dependencies required.
 
 ## Why?
 
-TODO
+For most websites, bundling your entire web application into a single file is generally NOT RECOMMENDED. However, in certain scenarios, this can be useful, such as:
 
-## Quick Setup
+-	Integrating your web app within desktop or mobile WebView components
+-	Deploying your web app to environments with strict access requirements
+-	Embedding your web app in embedded devices
+
+In these special cases, `nuxt-single-html` allows you to leverage the powerful development experience of Nuxt while easily bundling your web app into a single HTML file, even supporting page pre-rendering.
+
+This module is specifically designed to work with Nuxt. If you are looking for a similar solution for other frameworks, consider using [vite-plugin-singlefile](https://github.com/richardtallent/vite-plugin-singlefile).
+
+## Quickstart
 
 Install the module to your Nuxt application with one command:
 
@@ -28,17 +36,63 @@ Install the module to your Nuxt application with one command:
 npx nuxi module add nuxt-single-html
 ```
 
-That's it! You can build your Nuxt app into a single HTML now. ✨
+<details>
+  <summary>Install manually</summary>
+
+  ```sh
+  npm i -D nuxt-single-html
+  ```
+
+  ```ts
+  // nuxt.config.ts
+  export default defineNuxtConfig({
+    modules: ['nuxt-single-html']
+  })
+  ```
+</details>
+
+### Generate single HTML
+
+After installing, you can now build your Nuxt app into a single HTML now, no configuration required. Since [`nuxi build`](https://nuxt.com/docs/api/commands/build) does not prerender HTML files by default, you need to use [`nuxi generate`](https://nuxt.com/docs/api/commands/generate) to generate the HTML files.
 
 ```bash
 npx nuxi generate
 ```
 
-The generated HTML file would be output to `dist/index.html`.
+The HTML file output path depends on your ([`nitro.output.publicDir`](https://nitro.unjs.io/config#output)) Nuxt configuration. By default, it will be placed in the `.output/public` directory.
 
 ## Configuration
 
-TODO
+You can define these options in your `nuxt.config.js` file under the `singleHtml` key.
+
+#### Example Configuration:
+
+```javascript
+export default {
+  modules: [
+    'nuxt-single-html'
+  ],
+  singleHtml: {
+    enabled: true,
+    deleteInlinedFiles: true,
+    output: '[name].html'
+  }
+}
+```
+
+#### Options:
+
+- **`enabled`** (boolean)  
+  - **Description:** Enables or disables the single HTML mode when running the `nuxt generate` command.
+  - **Default:** `true`
+
+- **`deleteInlinedFiles`** (boolean)  
+  - **Description:** Specifies whether to delete inlined files after generating the single HTML file.
+  - **Default:** `true`
+
+- **`output`** (string)  
+  - **Description:** The output filename for the generated single HTML file. You can use `[name]` to refer to the original HTML file name. 
+  - **Default:** `'[name].html'`
 
 ## Contribution
 
