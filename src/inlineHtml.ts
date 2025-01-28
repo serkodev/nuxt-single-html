@@ -30,7 +30,7 @@ export function processHtmlFiles(baseFolder: string, options: SingleHtmlOptions,
 
 function inlineFilesInHtml(baseFolder: string, htmlPath: string, output: string, baseUrl: string) {
   const inlinedFiles: string[] = []
-  const baseUrlRemover = new RegExp(`^${baseUrl.replace(/^\//, '')}/`)
+  const baseUrlRemover = new RegExp(`^${baseUrl.replace(/^\//, '')}`)
 
   function replaceStyleTags(htmlContent: string) {
     const regex = /<link[^>]*rel="stylesheet"[^>]*href="\/([^"]*)"[^>]*>/g
