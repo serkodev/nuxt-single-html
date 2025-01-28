@@ -63,7 +63,7 @@ export default defineNuxtModule<SingleHtmlOptions>({
     // process entry html to replace inline js and css after prerender
     nuxt.hook('nitro:build:public-assets', (nitro) => {
       const dir = nitro.options.output.publicDir
-      processHtmlFiles(dir, options)
+      processHtmlFiles(dir, options, nuxt.options.app.baseURL)
     })
   },
 })
