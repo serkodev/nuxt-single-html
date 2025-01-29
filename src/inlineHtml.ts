@@ -3,14 +3,14 @@ import { readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import type { SingleHtmlOptions } from './options'
 import { findHtmlFiles, removeEmptyDirectories, replaceOutputFileName } from './utils'
 
-export function processHtmlFiles(baseFolder: string, options: SingleHtmlOptions) {
+export function processHtmlFiles(baseFolder: string, options: SingleHtmlOptions, baseUrl: string) {
   const { deleteInlinedFiles, output } = options
 
   try {
     const toRemoveFiles = new Set<string>()
 
     for (const entry of findHtmlFiles(baseFolder)) {
-      const inlinedFiles = inlineFilesInHtml(baseFolder, entry, output)
+      const inlinedFiles = inlineFilesInHtml(baseFolder, entry, output, baseUrl)
       for (const file of inlinedFiles)
         toRemoveFiles.add(file)
     }
@@ -28,14 +28,15 @@ export function processHtmlFiles(baseFolder: string, options: SingleHtmlOptions)
   }
 }
 
-function inlineFilesInHtml(baseFolder: string, htmlPath: string, output: string) {
+function inlineFilesInHtml(baseFolder: string, htmlPath: string, output: string, baseUrl: string) {
   const inlinedFiles: string[] = []
+  const baseUrlRemover = new RegExp(`^${baseUrl.replace(/^\//, '')}`)
 
   function replaceStyleTags(htmlContent: string) {
     const regex = /<link[^>]*rel="stylesheet"[^>]*href="\/([^"]*)"[^>]*>/g
     return htmlContent.replace(regex, (match, href) => {
       try {
-        const filePath = join(baseFolder, href)
+        const filePath = join(baseFolder, href.replace(baseUrlRemover, ''))
         const contents = readFileSync(filePath, 'utf-8')
         inlinedFiles.push(filePath)
         return `<style>${contents}</style>`
@@ -50,8 +51,8 @@ function inlineFilesInHtml(baseFolder: string, htmlPath: string, output: string)
     const regex = /<script(?:\s+type="([^"]*)")?\s+src="\/([^"]*)"[^>]*>[\s\S]*?<\/script>/g
     return htmlContent.replace(regex, (match, type, src) => {
       try {
-        const filePath = join(baseFolder, src)
-        const contents = readFileSync(join(baseFolder, src), 'utf-8')
+        const filePath = join(baseFolder, src.replace(baseUrlRemover, ''))
+        const contents = readFileSync(filePath, 'utf-8')
         inlinedFiles.push(filePath)
         return `<script${type ? ` type="${type}"` : ''}>${contents}</script>`
       }
