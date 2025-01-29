@@ -1,6 +1,6 @@
 {
   "name": "nuxt-single-html",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Build a Nuxt app into a single HTML file.",
   "repository": {
     "type": "git",
