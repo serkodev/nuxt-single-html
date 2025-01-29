@@ -18,7 +18,7 @@ export default defineNuxtModule<SingleHtmlOptions>({
 
     // only run when nuxi generate
     const isPrerender = nuxt.options.nitro.static
-    if (!isPrerender) {
+    if (!isPrerender && !nuxt.options.dev) {
       console.warn('nuxt-single-html module only works with `nuxt generate` or `nuxt build --prerender` commands.')
       return
     }
