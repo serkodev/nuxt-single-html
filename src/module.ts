@@ -37,15 +37,28 @@ export default defineNuxtModule<SingleHtmlOptions>({
     nuxt.options.vite.build.assetsInlineLimit = Number.MAX_SAFE_INTEGER
 
     // disable js code splitting
-    ;(nuxt.options.vite.build.rollupOptions ||= {}).output ||= {}
-    if (Array.isArray(nuxt.options.vite.build.rollupOptions.output)) {
-      nuxt.options.vite.build.rollupOptions.output.forEach((output) => {
-        output.inlineDynamicImports = true
-      })
+    function viteDisableCodeSplitting(config: typeof nuxt.options.vite) {
+      ;(config.build ||= {})
+      ;(config.build.rollupOptions ||= {}).output ||= {}
+
+      if (Array.isArray(config.build.rollupOptions.output)) {
+        config.build.rollupOptions.output.forEach((output) => {
+          output.preserveModules = false
+          output.inlineDynamicImports = true
+        })
+      }
+      else {
+        config.build.rollupOptions.output.preserveModules = false
+        config.build.rollupOptions.output.inlineDynamicImports = true
+      }
     }
-    else {
-      nuxt.options.vite.build.rollupOptions.output.inlineDynamicImports = true
-    }
+
+    viteDisableCodeSplitting(nuxt.options.vite)
+
+    // override nuxt vite server config (#4)
+    nuxt.hook('vite:extendConfig', (config) => {
+      viteDisableCodeSplitting(config)
+    })
 
     // ignore 200.html and 404.html
     nuxt.options.nitro.prerender ||= {}
