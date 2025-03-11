@@ -1,0 +1,13 @@
+packages:
+  - playground
+
+catalog:
+  nuxt: ^3.16.0
+  "@nuxt/schema": ^3.16.0
+  "@nuxt/kit": ^3.16.0
+
+catalogs:
+  nuxt:
+    nuxt: ^3.16.0
+    "@nuxt/schema": ^3.16.0
+    "@nuxt/kit": ^3.16.0
